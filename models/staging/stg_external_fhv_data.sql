@@ -1,24 +1,26 @@
-with 
+{{ config(materialized='view') }}
 
-source as (
+select
+    -- identifiers
+    {{ dbt_utils.generate_surrogate_key(['dispatching_base_num', 'pickup_datetime']) }} as tripid,
+    cast(dispatching_base_num as string) as vendorid,
+    cast(pulocationid as integer) as  pickup_locationid,
+    cast(dolocationid as integer) as dropoff_locationid,
 
-    select * from {{ source('staging', 'external_fhv_data') }}
+    -- timestamps
+    cast(pickup_datetime as timestamp) as pickup_datetime,
+    cast(dropoff_datetime as timestamp) as dropoff_datetime,
 
-),
+    -- trip info
+    sr_flag,
+from {{ source('staging','external_fhv_data') }}
+where dispatching_base_num is not null 
 
-renamed as (
+-- {% if var('is_test_run', default=true) %}
 
-    select
-        dispatching_base_num,
-        pickup_datetime,
-        dropoff_datetime,
-        pulocationid,
-        dolocationid,
-        sr_flag,
-        affiliated_base_number
+--     limit 100
 
-    from source
+-- {% endif %}
 
-)
 
-select * from renamed
+

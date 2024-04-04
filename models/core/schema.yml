@@ -1,151 +1,97 @@
 version: 2
 
-sources:
-  - name: staging
-    database: useful-monitor-415110
-    schema: trips_data_all
-
-    tables:
-      - name: green_tripdata
-      - name: yellow_tripdata
-      - name: external_fhv_data
-
 models:
-  - name: stg_green_tripdata
-    description: ""
+  - name: dim_zones
+    description: >
+      List of unique zones idefied by locationid. 
+      Includes the service zone they correspond to (Green or yellow).
     columns:
-      - name: tripid
+      - name: locationid
+        data_type: numeric
+        description: ""
+
+      - name: borough
         data_type: string
         description: ""
-        tests:
-          - unique:
-              severity: warn
+
+      - name: zone
+        data_type: string
+        description: ""
+
+      - name: service_zone
+        data_type: string
+        description: ""
+
+  - name: dm_montly_zone_revenue
+    description: >
+      Aggregated table of all taxi trips corresponding to both service zones (Green and yellow) per pickup zone, month and service.
+      The table contains monthly sums of the fare elements used to calculate the monthly revenue. 
+      The table contains also monthly indicators like number of trips, and average trip distance. 
+    columns:
+      - name: revenue_zone
+        data_type: string
+        description: ""
+
+      - name: revenue_month
+        data_type: timestamp
+        description: ""
+
+      - name: service_type
+        data_type: string
+        description: ""
+
+      - name: revenue_monthly_fare
+        data_type: numeric
+        description: ""
+
+      - name: revenue_monthly_extra
+        data_type: numeric
+        description: ""
+
+      - name: revenue_monthly_mta_tax
+        data_type: numeric
+        description: ""
+
+      - name: revenue_monthly_tip_amount
+        data_type: numeric
+        description: ""
+
+      - name: revenue_monthly_tolls_amount
+        data_type: numeric
+        description: ""
+
+      - name: revenue_monthly_ehail_fee
+        data_type: numeric
+        description: ""
+
+      - name: revenue_monthly_improvement_surcharge
+        data_type: numeric
+        description: ""
+
+      - name: revenue_monthly_total_amount
+        data_type: numeric
+        description: ""
+        test:
           - not_null:
-              severity: warn
-          
-      - name: vendorid
+              severity: error
+
+      - name: total_monthly_trips
         data_type: int64
         description: ""
 
-      - name: ratecodeid
-        data_type: int64
+      - name: avg_monthly_passenger_count
+        data_type: float64
         description: ""
 
-      - name: pickup_locationid
-        data_type: int64
-        description: ""
-        tests:
-          - relationships:
-              to: ref('taxi_zone_lookup')
-              field: locationid
-              severity: warn
-
-      - name: dropoff_locationid
-        data_type: int64
-        description: ""
-        tests:
-          - relationships:
-              to: ref('taxi_zone_lookup')
-              field: locationid
-              severity: warn
-
-      - name: pickup_datetime
-        data_type: timestamp
-        description: ""
-
-      - name: dropoff_datetime
-        data_type: timestamp
-        description: ""
-
-      - name: store_and_fwd_flag
-        data_type: string
-        description: ""
-
-      - name: passenger_count
-        data_type: int64
-        description: ""
-
-      - name: trip_distance
+      - name: avg_monthly_trip_distance
         data_type: numeric
         description: ""
 
-      - name: trip_type
-        data_type: int64
-        description: ""
-
-      - name: fare_amount
-        data_type: numeric
-        description: ""
-
-      - name: extra
-        data_type: numeric
-        description: ""
-
-      - name: mta_tax
-        data_type: numeric
-        description: ""
-
-      - name: tip_amount
-        data_type: numeric
-        description: ""
-
-      - name: tolls_amount
-        data_type: numeric
-        description: ""
-
-      - name: ehail_fee
-        data_type: numeric
-        description: ""
-
-      - name: improvement_surcharge
-        data_type: numeric
-        description: ""
-
-      - name: total_amount
-        data_type: numeric
-        description: ""
-
-      - name: payment_type
-        data_type: int64
-        description: ""
-
-      - name: total_fare
-        data_type: numeric
-        description: ""
-
-  - name: stg_external_fhv_data
-    description: ""
-    columns:
-      - name: dispatching_base_num
-        data_type: string
-        description: ""
-
-      - name: pickup_datetime
-        data_type: timestamp
-        description: ""
-
-      - name: dropoff_datetime
-        data_type: timestamp
-        description: ""
-
-      - name: pulocationid
-        data_type: int64
-        description: ""
-
-      - name: dolocationid
-        data_type: int64
-        description: ""
-
-      - name: sr_flag
-        data_type: string
-        description: ""
-
-      - name: affiliated_base_number
-        data_type: string
-        description: ""
-
-  - name: stg_yellow_tripdata
-    description: ""
+  - name: fact_trips
+    description:  >
+      Taxi trips corresponding to both service zones (Green and yellow).
+      The table contains records where both pickup and dropoff locations are valid and known zones. 
+      Each record corresponds to a trip uniquely identified by tripid.
     columns:
       - name: tripid
         data_type: string
@@ -155,6 +101,10 @@ models:
         data_type: int64
         description: ""
 
+      - name: service_type
+        data_type: string
+        description: ""
+
       - name: ratecodeid
         data_type: int64
         description: ""
@@ -163,8 +113,24 @@ models:
         data_type: int64
         description: ""
 
+      - name: pickup_borough
+        data_type: string
+        description: ""
+
+      - name: pickup_zone
+        data_type: string
+        description: ""
+
       - name: dropoff_locationid
         data_type: int64
+        description: ""
+
+      - name: dropoff_borough
+        data_type: string
+        description: ""
+
+      - name: dropoff_zone
+        data_type: string
         description: ""
 
       - name: pickup_datetime
@@ -230,4 +196,3 @@ models:
       - name: total_fare
         data_type: numeric
         description: ""
-
