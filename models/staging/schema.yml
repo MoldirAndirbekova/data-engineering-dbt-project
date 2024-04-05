@@ -12,7 +12,7 @@ sources:
 
 models:
   - name: stg_green_tripdata
-    description: "This is a data about greent trip data."
+    description: "This is a data about greent trip data. This example"
     columns:
       - name: tripid
         data_type: string
